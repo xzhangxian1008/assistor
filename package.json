@@ -1,0 +1,57 @@
+{
+  "name": "assistor",
+  "version": "1.0.0",
+  "description": "A cross-platform work log assistant built with Electron and TypeScript",
+  "main": "dist/main/main.js",
+  "author": "Assistor",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "electron-rebuild -f -w better-sqlite3",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.renderer.json && node scripts/copy-assets.cjs",
+    "start": "npm run build && electron .",
+    "dev": "npm run build && electron .",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.0",
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.0",
+    "typescript": "^5.9.0"
+  },
+  "build": {
+    "appId": "com.assistor.desktop",
+    "productName": "Assistor",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json",
+      "node_modules/better-sqlite3/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*"
+    ],
+    "win": {
+      "target": ["nsis"]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Assistor",
+      "installerLanguages": ["zh_CN"],
+      "language": "2052"
+    },
+    "mac": {
+      "target": ["dmg"]
+    }
+  }
+}

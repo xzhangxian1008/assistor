@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assistor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="monaco-workbench">
+      <div class="workbench-body" id="workbenchBody">
+        <nav class="activitybar" aria-label="活动栏">
+          <div class="activity-actions">
+            <button class="activity-item active" data-view="entries" title="条目 (Ctrl+Shift+E)" aria-label="条目">
+              <svg viewBox="0 0 24 24"><path d="M14.5 3H7.7A1.7 1.7 0 0 0 6 4.7v14.6A1.7 1.7 0 0 0 7.7 21h9.6a1.7 1.7 0 0 0 1.7-1.7V7.5L14.5 3z"/><path d="M14 3v5h5M9 13h6M9 17h6M9 9h2"/></svg>
+            </button>
+            <button class="activity-item" data-view="archive" title="存档任务 (Ctrl+Shift+A)" aria-label="存档任务">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/></svg>
+            </button>
+          </div>
+          <div class="activity-actions bottom">
+            <button class="activity-item" id="paletteButton" title="命令面板 (Ctrl+Shift+P)" aria-label="命令面板">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+            </button>
+          </div>
+        </nav>
+
+        <aside class="sidebar" id="sidebar">
+          <section class="viewlet" id="entriesView">
+            <div class="composite-title">
+              <h2>条目</h2>
+              <div class="title-actions">
+                <button class="action-icon" id="newTaskButton" title="新建任务 (Ctrl+N)" aria-label="新建任务">
+                  <svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>
+                </button>
+                <button class="action-icon" id="openTaskButton" title="打开任务 (Ctrl+P)" aria-label="打开任务">
+                  <svg viewBox="0 0 16 16"><path d="M2 4.5h4l1.2 1.5H14v6.5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg>
+                </button>
+                <button class="action-icon" id="collapseAllButton" title="全部折叠" aria-label="全部折叠">
+                  <svg viewBox="0 0 16 16"><path d="M4 2.5h9a.5.5 0 0 1 .5.5v9M2.5 5h8v8h-8zM4.5 9h4"/></svg>
+                </button>
+                <button class="action-icon" id="expandAllButton" title="全部展开" aria-label="全部展开">
+                  <svg viewBox="0 0 16 16"><path d="M4 2.5h9a.5.5 0 0 1 .5.5v9M2.5 5h8v8h-8zM4.5 9h4M6.5 7v4"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="pane-header">
+              <svg class="pane-chevron" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg>
+              <span id="paneTitle">全部任务</span>
+              <span class="pane-badge" id="paneBadge">0</span>
+            </div>
+            <div id="entryTree" class="tree" role="tree" tabindex="0" aria-label="条目时间线"></div>
+          </section>
+
+          <section class="viewlet hidden" id="archiveView">
+            <div class="composite-title">
+              <h2>存档任务</h2>
+            </div>
+            <div class="pane-hint">关闭标签只会存档任务；恢复后任务会重新出现在标签栏。</div>
+            <div id="archiveList" class="tree" role="list"></div>
+          </section>
+        </aside>
+        <div class="sash" id="sash" title="拖动调整宽度"></div>
+
+        <main class="editor-group">
+          <div class="tabs-container">
+            <div class="tabs" id="taskTabs" role="tablist"></div>
+            <div class="editor-actions">
+              <button class="action-icon" id="tabsNewTaskButton" title="新建任务 (Ctrl+N)" aria-label="新建任务">
+                <svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="breadcrumbs" id="breadcrumbs"></div>
+
+          <section class="editor">
+            <div id="emptyDetail" class="editor-watermark">
+              <div class="watermark-logo">A</div>
+              <dl class="watermark-shortcuts">
+                <dt>命令面板</dt><dd><kbd data-mod>Ctrl</kbd><kbd>Shift</kbd><kbd>P</kbd></dd>
+                <dt>打开任务</dt><dd><kbd data-mod>Ctrl</kbd><kbd>P</kbd></dd>
+                <dt>新建任务</dt><dd><kbd data-mod>Ctrl</kbd><kbd>N</kbd></dd>
+                <dt>保存条目</dt><dd><kbd data-mod>Ctrl</kbd><kbd>S</kbd></dd>
+                <dt>重命名任务</dt><dd><kbd>F2</kbd></dd>
+                <dt>放大 / 缩小</dt><dd><kbd data-mod>Ctrl</kbd><kbd>=</kbd> <kbd data-mod>Ctrl</kbd><kbd>-</kbd></dd>
+              </dl>
+            </div>
+            <div id="detailView" class="detail hidden">
+              <header class="detail-header">
+                <div class="detail-title"><span id="detailId" class="detail-id"></span><span id="detailStatus" class="status-chip"></span></div>
+                <div id="detailMeta" class="detail-meta"></div>
+              </header>
+              <div id="detailContent" class="code-view" role="document"></div>
+            </div>
+          </section>
+
+          <section class="panel composer" id="composer">
+            <div class="panel-header">
+              <div class="panel-tab active">新建条目</div>
+              <div class="panel-hint">保存时自动记录当前时间</div>
+            </div>
+            <div class="panel-body">
+              <div class="composer-controls">
+                <label class="field">状态
+                  <select id="statusSelect">
+                    <option value="note">记录</option>
+                    <option value="start">开始</option>
+                    <option value="end">结束</option>
+                  </select>
+                </label>
+                <label class="field task-field">保存到
+                  <select id="taskSelect"></select>
+                </label>
+                <label id="endField" class="field end-field hidden">对应开始条目
+                  <input id="endEntryInput" list="startEntryList" placeholder="输入开始条目 ID" spellcheck="false" />
+                  <datalist id="startEntryList"></datalist>
+                </label>
+              </div>
+              <textarea id="contentInput" class="content-input" placeholder="记录当前进展、决定、问题或下一步计划…" spellcheck="false"></textarea>
+              <div class="composer-footer">
+                <div class="shortcut-hint"><kbd data-mod>Ctrl</kbd><kbd>S</kbd> 保存</div>
+                <button id="saveButton" class="monaco-button">保存条目</button>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+
+      <footer class="statusbar">
+        <div class="statusbar-left">
+          <span class="statusbar-item remote">
+            <svg viewBox="0 0 16 16"><path d="M5 4L1.5 8 5 12M11 4l3.5 4-3.5 4"/></svg>Assistor
+          </span>
+          <span class="statusbar-item" id="statusOpen" title="未结束的开始条目"></span>
+          <span class="statusbar-item" id="statusText">就绪</span>
+        </div>
+        <div class="statusbar-right">
+          <span class="statusbar-item" id="statusView"></span>
+          <button class="statusbar-item clickable hidden" id="statusZoom" title="缩放（点击调整）">
+            <svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.3 10.3l3.2 3.2M5 7h4M7 5v4"/></svg><span id="statusZoomText"></span>
+          </button>
+          <span class="statusbar-item">SQLite</span>
+          <span class="statusbar-item">Electron</span>
+        </div>
+      </footer>
+    </div>
+
+    <div id="quickInput" class="quick-input hidden" role="dialog" aria-modal="true">
+      <div class="quick-input-title" id="quickInputTitle"></div>
+      <div class="quick-input-box"><input id="quickInputBox" spellcheck="false" autocomplete="off" /></div>
+      <div class="quick-input-message" id="quickInputMessage"></div>
+      <div class="quick-input-list" id="quickInputList" role="listbox"></div>
+    </div>
+
+    <div id="dialogBackdrop" class="dialog-backdrop hidden">
+      <div class="dialog" role="alertdialog" aria-modal="true">
+        <div class="dialog-body">
+          <div class="dialog-icon">!</div>
+          <div>
+            <div class="dialog-message" id="dialogMessage"></div>
+            <div class="dialog-detail" id="dialogDetail"></div>
+          </div>
+        </div>
+        <div class="dialog-buttons">
+          <button class="monaco-button" id="dialogConfirm"></button>
+          <button class="monaco-button secondary" id="dialogCancel">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="contextMenu" class="context-menu hidden" role="menu"></div>
+    <div id="notifications" class="notifications"></div>
+
+    <script type="module" src="renderer.js"></script>
+  </body>
+</html>
